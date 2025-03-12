@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>📊 ML Analysis Dashboard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0f2f5, #dce1e8);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1100px;
+            width: 100%;
+            box-sizing: border-box;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #e3e6ea; transition: 0.3s; }
+        .highlight {
+            background: rgba(72, 201, 176, 0.15);
+            border-left: 5px solid #27ae60;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .btn {
+            display: inline-block;
+            background: #2980b9;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #1c5985;
+            transform: scale(1.05);
+        }
+        .chart-container {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2>📊 Machine Learning Analysis</h2>
+    <h3>📦 Dataset Overview</h3>
+    <table>
+        <tr><td><strong>Rows</strong></td><td>{{ dataset_info['shape'][0] }}</td></tr>
+        <tr><td><strong>Columns</strong></td><td>{{ dataset_info['shape'][1] }}</td></tr>
+    </table>
+    {% set best_model = results | max(attribute='accuracy') %}
+    <div class="highlight">
+        ✅ Best Model: <strong>{{ best_model['model'] }}</strong> with Accuracy: <strong>{{ best_model['accuracy'] }}%</strong>
+    </div>
+    <h3>🏅 Model Performance</h3>
+    <table>
+        <tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1 Score</th></tr>
+        {% for result in results %}
+        <tr>
+            <td>{{ result['model'] }}</td>
+            <td>{{ result['accuracy'] }}%</td>
+            <td>{{ result['precision'] }}%</td>
+            <td>{{ result['recall'] }}%</td>
+            <td>{{ result['f1_score'] }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="chart-container">
+        <h3>📊 Accuracy Chart</h3>
+        <canvas id="accuracyChart"></canvas>
+    </div>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="/" class="btn">⬅️ Upload Another File</a>
+    </div>
+</div>
+<script>
+    const chartData = {{ chart_data | tojson | safe }};
+    new Chart(document.getElementById('accuracyChart'), {
+        type: 'bar',
+        data: {
+            labels: chartData.models,
+            datasets: [{
+                label: 'Accuracy (%)',
+                data: chartData.accuracies,
+                backgroundColor: '#2980b9',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+</script>
+</body>
+</html>
